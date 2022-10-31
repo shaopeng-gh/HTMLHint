@@ -5,10 +5,11 @@ import {
   SarifRuleBuilder,
   SarifRunBuilder,
 } from 'node-sarif-builder'
-import { Rule } from '../../core/types'
 import * as path from 'path'
 import { pathToFileURL } from 'url'
 import { Result } from 'sarif'
+
+const pkg = require('../../../package.json')
 
 const sarifFormatter: FormatterCallback = function (formatter) {
   formatter.on('end', (event) => {
@@ -20,19 +21,19 @@ const sarifFormatter: FormatterCallback = function (formatter) {
     // SARIF Run builder
     const sarifRunBuilder = new SarifRunBuilder().initSimple({
       toolDriverName: 'HTMLHint',
-      toolDriverVersion: '1.1.4',
+      toolDriverVersion: pkg.version,
       url: 'https://htmlhint.com/',
     })
 
     // SARIF rules
-    const addedRuleSet = new Set<Rule>()
+    const addedRuleSet = new Set<string>()
     arrAllMessages.forEach((result) => {
       result.messages.forEach((message) => {
         const rule = message.rule
-        if (addedRuleSet.has(rule)) {
+        if (addedRuleSet.has(rule.id)) {
           return
         }
-        addedRuleSet.add(rule)
+        addedRuleSet.add(rule.id)
         const sarifRuleBuiler = new SarifRuleBuilder().initSimple({
           ruleId: rule.id,
           shortDescriptionText: rule.description,

@@ -26,7 +26,7 @@ describe('CLI', () => {
           expect(typeof error).toBe('object')
           expect(error.code).toBe(1)
 
-          expect(stdout).not.toBe('')
+          expect(stdout).toBe('')
 
           const jsonStdout = JSON.parse(stdout)
           expect(typeof jsonStdout).toBe('object')

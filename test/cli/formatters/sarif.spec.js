@@ -22,7 +22,7 @@ describe('CLI', () => {
           '--format',
           'sarif',
         ].join(' '),
-        { maxBuffer: 1024 * 500 },
+        { maxBuffer: 1024 * 5000 },
         (error, stdout, stderr) => {
           expect(typeof error).toBe('object')
           expect(error.code).toBe(1)

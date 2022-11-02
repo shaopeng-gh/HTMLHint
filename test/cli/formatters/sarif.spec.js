@@ -1,6 +1,7 @@
 const ChildProcess = require('child_process')
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
 
 if (os.platform() !== 'darwin')
   describe('CLI', () => {

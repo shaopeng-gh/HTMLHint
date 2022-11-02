@@ -14,56 +14,52 @@ describe('CLI', () => {
 
       const expected = JSON.parse(expectedFileContent)
 
-      process.stdout._handle.setBlocking(true)
+      var child = ChildProcess.spawn('node', [
+        path.resolve(__dirname, '../../../bin/htmlhint'),
+        path.resolve(__dirname, 'example.html'),
+        '--format',
+        'sarif',
+      ])
 
-      ChildProcess.exec(
-        [
-          'node',
-          path.resolve(__dirname, '../../../bin/htmlhint'),
-          path.resolve(__dirname, 'example.html'),
-          '--format',
-          'sarif',
-        ].join(' '),
-        { maxBuffer: 1024 * 5000 },
-        (error, stdout, stderr) => {
-          expect(typeof error).toBe('object')
-          expect(error.code).toBe(1)
+      child.stdout.on('data', function (stdout) {
+        expect(stdout).not.toBe('')
 
-          expect(stdout).not.toBe('')
+        const jsonStdout = JSON.parse(stdout)
+        expect(typeof jsonStdout).toBe('object')
+        expect(
+          jsonStdout['runs'][0]['artifacts'][0]['location']['uri']
+        ).toContain('example.html')
 
-          const jsonStdout = JSON.parse(stdout)
-          expect(typeof jsonStdout).toBe('object')
-          expect(
-            jsonStdout['runs'][0]['artifacts'][0]['location']['uri']
-          ).toContain('example.html')
+        const stdoutResults = jsonStdout['runs'][0]['results']
+        const stdoutRules = jsonStdout['runs'][0]['tool']['driver']['rules']
 
-          const stdoutResults = jsonStdout['runs'][0]['results']
-          const stdoutRules = jsonStdout['runs'][0]['tool']['driver']['rules']
+        expect(stdoutResults).toBeInstanceOf(Array)
+        expect(stdoutResults.length).toBe(expected['runs'][0]['results'].length)
 
-          expect(stdoutResults).toBeInstanceOf(Array)
-          expect(stdoutResults.length).toBe(
-            expected['runs'][0]['results'].length
-          )
+        expect(stdoutRules).toBeInstanceOf(Array)
+        expect(stdoutRules.length).toBe(
+          expected['runs'][0]['tool']['driver']['rules'].length
+        )
 
-          expect(stdoutRules).toBeInstanceOf(Array)
-          expect(stdoutRules.length).toBe(
-            expected['runs'][0]['tool']['driver']['rules'].length
-          )
-
-          for (let i = 0; i < stdoutResults.length; i++) {
-            expect(stdoutResults[i]).toEqual(expected['runs'][0]['results'][i])
-          }
-
-          for (let i = 0; i < stdoutRules.length; i++) {
-            expect(stdoutRules[i]).toEqual(
-              expected['runs'][0]['tool']['driver']['rules'][i]
-            )
-          }
-
-          expect(stderr).toBe('')
-          done()
+        for (let i = 0; i < stdoutResults.length; i++) {
+          expect(stdoutResults[i]).toEqual(expected['runs'][0]['results'][i])
         }
-      )
+
+        for (let i = 0; i < stdoutRules.length; i++) {
+          expect(stdoutRules[i]).toEqual(
+            expected['runs'][0]['tool']['driver']['rules'][i]
+          )
+        }
+      })
+
+      child.stderr.on('data', function (stderr) {
+        expect(stderr).toBe('')
+      })
+
+      child.on('close', function (code) {
+        expect(code).toBe(1)
+        done()
+      })
     })
   })
 })

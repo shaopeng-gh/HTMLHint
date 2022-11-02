@@ -22,11 +22,12 @@ describe('CLI', () => {
           '--format',
           'sarif',
         ].join(' '),
+        { maxBuffer: 1024 * 500 },
         (error, stdout, stderr) => {
           expect(typeof error).toBe('object')
           expect(error.code).toBe(1)
 
-          expect(stdout).toBe('')
+          expect(stdout).not.toBe('')
 
           const jsonStdout = JSON.parse(stdout)
           expect(typeof jsonStdout).toBe('object')

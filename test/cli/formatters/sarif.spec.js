@@ -3,29 +3,29 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
-if (os.platform() !== 'darwin')
-  describe('CLI', () => {
-    describe('Formatter: sarif', () => {
-      it('should have stdout output with formatter sarif', (done) => {
-        const expectedFileContent = fs
-          .readFileSync(path.resolve(__dirname, 'sarif.sarif'), 'utf8')
-          .replace(
-            /\{\{path\}\}/g,
-            path.resolve(__dirname, 'example.html').replace(/\\/g, '\\\\')
-          )
+describe('CLI', () => {
+  describe('Formatter: sarif', () => {
+    it('should have stdout output with formatter sarif', (done) => {
+      const expectedFileContent = fs
+        .readFileSync(path.resolve(__dirname, 'sarif.sarif'), 'utf8')
+        .replace(
+          /\{\{path\}\}/g,
+          path.resolve(__dirname, 'example.html').replace(/\\/g, '\\\\')
+        )
 
-        const expected = JSON.parse(expectedFileContent)
+      const expected = JSON.parse(expectedFileContent)
 
-        var child = ChildProcess.spawn('node', [
-          path.resolve(__dirname, '../../../bin/htmlhint'),
-          path.resolve(__dirname, 'example.html'),
-          '--format',
-          'sarif',
-        ])
+      var child = ChildProcess.spawn('node', [
+        path.resolve(__dirname, '../../../bin/htmlhint'),
+        path.resolve(__dirname, 'example.html'),
+        '--format',
+        'sarif',
+      ])
 
-        child.stdout.on('data', function (stdout) {
-          expect(stdout).not.toBe('')
+      child.stdout.on('data', function (stdout) {
+        expect(stdout).not.toBe('')
 
+        if (os.platform() !== 'darwin') {
           const jsonStdout = JSON.parse(stdout)
           expect(typeof jsonStdout).toBe('object')
           expect(
@@ -54,16 +54,17 @@ if (os.platform() !== 'darwin')
               expected['runs'][0]['tool']['driver']['rules'][i]
             )
           }
-        })
+        }
+      })
 
-        child.stderr.on('data', function (stderr) {
-          expect(stderr).toBe('')
-        })
+      child.stderr.on('data', function (stderr) {
+        expect(stderr).toBe('')
+      })
 
-        child.on('close', function (code) {
-          expect(code).toBe(1)
-          done()
-        })
+      child.on('close', function (code) {
+        expect(code).toBe(1)
+        done()
       })
     })
   })
+})

@@ -41,7 +41,7 @@ const sarifFormatter = function (formatter) {
                     ruleId: ruleId,
                     fileUri: process.env.SARIF_URI_ABSOLUTE
                         ? (0, url_1.pathToFileURL)(result.file).toString()
-                        : path.relative(process.cwd(), result.file).replace(/\\/g, "/"),
+                        : path.relative(process.cwd(), result.file).replace(/\\/g, '/'),
                     startLine: message.line,
                     startColumn: message.col,
                     endLine: message.line,

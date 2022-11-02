@@ -14,6 +14,8 @@ describe('CLI', () => {
 
       const expected = JSON.parse(expectedFileContent)
 
+      process.stdout._handle.setBlocking(true)
+
       ChildProcess.exec(
         [
           'node',
